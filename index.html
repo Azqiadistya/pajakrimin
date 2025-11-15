@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Rekap Pajak Listrik</title>
+    <style>
+        :root {
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: #eef2fb;
+            color: #1f2a44;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            padding: 3rem 1.5rem;
+        }
+
+        .layout {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            gap: 2rem;
+            grid-template-columns: minmax(0, 360px) 1fr;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 50px rgba(26, 41, 87, .14);
+        }
+
+        h1 {
+            margin: 0 0 1.3rem;
+            font-size: 1.65rem;
+            color: #18213b;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: .35rem;
+            color: #435070;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: .8rem 1rem;
+            border-radius: 12px;
+            border: 1px solid #d4dbee;
+            margin-bottom: 1.1rem;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #5670ff;
+            box-shadow: 0 0 0 3px rgba(86, 112, 255, .15);
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: .9rem 1.2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .form-section {
+            margin-bottom: 1.4rem;
+        }
+
+        .settings-section {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e3e8fb;
+        }
+
+        .section-title {
+            font-size: .85rem;
+            font-weight: 700;
+            margin: 0 0 .6rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #7a88ab;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: .75rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .form-actions button {
+            flex: 1 1 160px;
+        }
+
+        #btn-cancel-edit {
+            background: #fff4d7;
+            color: #6a4500;
+        }
+
+        .edit-indicator {
+            background: #fff8e5;
+            border: 1px solid #ffe2ab;
+            color: #7a4b00;
+            padding: .55rem .9rem;
+            border-radius: 12px;
+            font-size: .9rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary {
+            background: #4f6cff;
+            color: #fff;
+            width: 100%;
+        }
+
+        .btn-secondary {
+            background: #e6ecff;
+            color: #1f2a44;
+        }
+
+        .btn-danger {
+            background: #ffe0df;
+            color: #7a0a00;
+        }
+
+        .preview {
+            background: #eef2ff;
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 1.4rem;
+            border: 1px solid #d7e0ff;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: .45rem;
+            font-size: .95rem;
+        }
+
+        .row strong {
+            color: #18213b;
+        }
+
+        .row.total {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #2442f5;
+            margin-top: .6rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: .75rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .controls button {
+            flex: 1 1 180px;
+        }
+
+        .table-shell {
+            border: 1px solid #d9e0f5;
+            border-radius: 16px;
+            box-shadow: 0 10px 35px rgba(31, 42, 68, .08);
+            background: #fefefe;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .rekap-title {
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: .03em;
+        }
+
+        .rekap-table {
+            width: 100%;
+            min-width: 640px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .rekap-table th,
+        .rekap-table td {
+            border: 1px solid #cad3f0;
+            padding: .6rem .7rem;
+            font-size: .95rem;
+        }
+
+        .rekap-table th {
+            background: #f5f6ff;
+            text-transform: uppercase;
+            font-size: .8rem;
+            letter-spacing: .06em;
+        }
+
+        .rekap-table td.amount {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .rekap-table td.actions {
+            text-align: center;
+        }
+
+        .rekap-table td {
+            background: #fff;
+        }
+
+        .rekap-table tr:nth-child(even) td {
+            background: #f9faff;
+        }
+
+        .summary-row td {
+            background: #edf1ff;
+            font-weight: 600;
+        }
+
+        .grand-row td {
+            background: #dde4ff;
+            font-weight: 700;
+        }
+
+        .note-row td {
+            background: #f5f6ff;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: .05em;
+        }
+
+
+        .action-btn {
+            border: none;
+            padding: .35rem .75rem;
+            border-radius: 999px;
+            background: #e4edff;
+            color: #1f2a44;
+            font-weight: 600;
+            font-size: .75rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .action-btn:hover {
+            background: #cdd8ff;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 2.3rem;
+            color: #7a88ab;
+            background: #f7f8ff;
+            border-radius: 16px;
+            border: 1px dashed #c9d1ef;
+        }
+
+        @media (max-width: 960px) {
+            body {
+                padding: 2.2rem 1rem;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+
+            .preview {
+                margin-top: 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1.5rem .8rem;
+            }
+
+            .controls button {
+                flex: 1 1 100%;
+            }
+
+            .rekap-table {
+                min-width: 520px;
+            }
+
+            h1 {
+                font-size: 1.35rem;
+            }
+        }
+    </style>
+    <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+
+<body>
+    <div class="layout">
+        <section class="card" aria-label="Form Input">
+            <h1>Input Pajak Listrik</h1>
+
+            <div class="form-section">
+                <label for="nama">Nama Wajib Pajak</label>
+                <input id="nama" placeholder="Contoh: A">
+                <label for="nominal">Nominal Asli (Rp)</label>
+                <input id="nominal" type="text" inputmode="numeric" pattern="[0-9]*" placeholder="Contoh: 42.000">
+            </div>
+
+            <div class="form-actions">
+                <button id="btn-save" class="btn-primary" disabled>Simpan ke Rekap</button>
+                <button id="btn-cancel-edit" class="btn-secondary" type="button" hidden>Batal Edit</button>
+            </div>
+
+            <div id="edit-indicator" class="edit-indicator" hidden></div>
+
+            <div class="preview" aria-live="polite">
+                <div class="row"><span>Nama</span><strong id="out-nama">-</strong></div>
+                <div class="row"><span>Nominal Asli</span><strong id="out-asli">Rp0</strong></div>
+                <div class="row"><span>Dibulatkan</span><strong id="out-bulat">Rp0</strong></div>
+                <div class="row"><span>Admin</span><strong id="out-admin">Rp0</strong></div>
+                <div class="row total"><span>Total Bayar</span><span id="out-total">Rp0</span></div>
+            </div>
+
+            <div class="form-section settings-section">
+                <p class="section-title">Pengaturan Dokumen</p>
+                <label for="dusun">Dusun</label>
+                <select id="dusun">
+                    <option value="GANDU">GANDU</option>
+                    <option value="JRAKAH">JRAKAH</option>
+                </select>
+                <label for="periode">Periode</label>
+                <input id="periode" placeholder="Contoh: BULAN OKTOBER 2025">
+                <label for="due-date">Jatuh Tempo Pembayaran</label>
+                <input id="due-date" type="date">
+                <label for="admin-fee">Biaya Admin (Rp)</label>
+                <input id="admin-fee" type="number" min="0" step="100" placeholder="Contoh: 3000">
+            </div>
+        </section>
+
+        <section class="card" aria-label="Rekap Tersimpan">
+            <h1>Rekap Tersimpan</h1>
+            <div id="table-wrapper"></div>
+            <div class="controls">
+                <button id="btn-sample-gandu" class="btn-secondary" type="button">Sampel Gandu</button>
+                <button id="btn-sample-jrakah" class="btn-secondary" type="button">Sampel Jrakah</button>
+                <button id="btn-download-image" class="btn-secondary" type="button" disabled>Download Gambar</button>
+                <button id="btn-download-excel" class="btn-secondary" type="button" disabled>Download Excel</button>
+                <button id="btn-clear" class="btn-danger" type="button" disabled>Hapus Semua</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const DEFAULT_ADMIN_FEE = 3000;
+        const STORAGE_KEY = "pajak-listrik-entries";
+        const SETTINGS_KEY = "pajak-listrik-settings";
+        const DEFAULT_SETTINGS = {
+            dusun: "GANDU",
+            periode: "BULAN OKTOBER 2025",
+            dueDate: "2025-10-18",
+            admin: DEFAULT_ADMIN_FEE
+        };
+        const SAMPLE_DATASETS = {
+            GANDU: [
+                "NOYOKARSO",
+                "TUKIMAN",
+                "TAMAN",
+                "TUKIYO",
+                "TARIMAN",
+                "JOYOKROMO",
+                "TARSI/KARTOMO",
+                "SARINO",
+                "NOYODIKROMO",
+                "REDJO",
+                "WIRYO PARTONO",
+                "KARSOIKROMO",
+                "SONOSEMITO",
+                "JUMADI",
+                "CITRO",
+                "DARMO",
+                "KROMONTONO",
+                "MASJID",
+                "GIYONO",
+                "KARSONO",
+                "KARTONO",
+                "ARIS",
+                "KARSONTONO",
+                "KATIMO",
+                "SUKIYEM M",
+                "KARDI",
+                "BUDI SUSETYO",
+                "RIMIN ROSADI",
+                "WARNO",
+                "NARMAN"
+            ],
+            JRAKAH: [
+                "SUPAR SATUN",
+                "MARIKEM",
+                "MARNO SINI",
+                "MUJI",
+                "SUKINO SARI",
+                "SAIMIN",
+                "MARWAN",
+                "WARSONO",
+                "SUGENG PURWANTO",
+                "KATMO",
+                "NARSO",
+                "SOSEMITO MARYOTO",
+                "SUNARDI",
+                "SUMIYATI",
+                "PARWOTO",
+                "SUKINO",
+                "WARDI",
+                "SARMIN",
+                "SUGINEM",
+                "SUKIYEM",
+                "SARNI",
+                "YATIYEM",
+                "TARSO"
+            ]
+        };
+        const MONTH_NAMES = ["JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI", "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"];
+        const titleCase = text => {
+            if (!text) return "";
+            return text.toLowerCase().split(/\s+/).filter(Boolean).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+        };
+        const getDusunLabel = () => titleCase(settings?.dusun || "Dusun");
+        const getPeriodeLabel = () => {
+            const upper = (settings?.periode || "").toUpperCase();
+            const found = MONTH_NAMES.find(month => upper.includes(month));
+            if (found) return titleCase(found);
+            return settings?.periode ? titleCase(settings.periode) : "Periode";
+        };
+        const getImageFileName = () => {
+            const dusun = getDusunLabel().replace(/\s+/g, "") || "Dusun";
+            const periode = getPeriodeLabel().replace(/\s+/g, "") || "Periode";
+            return `Pajak-${dusun}-${periode}`;
+        };
+
+        const makeId = () => crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        const rupiah = value => value.toLocaleString("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 });
+        const formatJumlahPlain = value => value === null || value === undefined ? "" : value.toLocaleString("id-ID");
+        const parseNumericInput = value => {
+            if (!value) return 0;
+            const cleaned = value.toString().replace(/[^0-9]/g, "");
+            return Number(cleaned) || 0;
+        };
+        const loadSettings = () => {
+            try {
+                const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}");
+                return { ...DEFAULT_SETTINGS, ...stored };
+            } catch (err) {
+                console.error("Gagal memuat pengaturan:", err);
+                return { ...DEFAULT_SETTINGS };
+            }
+        };
+        const persistSettings = () => localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+
+        let settings = loadSettings();
+        let editingId = null;
+
+        const els = {
+            nama: document.getElementById("nama"),
+            nominal: document.getElementById("nominal"),
+            save: document.getElementById("btn-save"),
+            cancelEdit: document.getElementById("btn-cancel-edit"),
+            sampleGandu: document.getElementById("btn-sample-gandu"),
+            sampleJrakah: document.getElementById("btn-sample-jrakah"),
+            downloadImage: document.getElementById("btn-download-image"),
+            downloadExcel: document.getElementById("btn-download-excel"),
+            clear: document.getElementById("btn-clear"),
+            tableWrapper: document.getElementById("table-wrapper"),
+            outNama: document.getElementById("out-nama"),
+            outAsli: document.getElementById("out-asli"),
+            outBulat: document.getElementById("out-bulat"),
+            outAdmin: document.getElementById("out-admin"),
+            outTotal: document.getElementById("out-total"),
+            dusun: document.getElementById("dusun"),
+            periode: document.getElementById("periode"),
+            dueDate: document.getElementById("due-date"),
+            adminFee: document.getElementById("admin-fee"),
+            editIndicator: document.getElementById("edit-indicator"),
+        };
+
+        const syncSettingsUi = () => {
+            els.dusun.value = settings.dusun;
+            els.periode.value = settings.periode || "";
+            els.dueDate.value = settings.dueDate || "";
+            els.adminFee.value = settings.admin ?? DEFAULT_ADMIN_FEE;
+        };
+
+        const getExportTitle = () => {
+            const periode = settings.periode ? ` ${settings.periode}` : "";
+            return `PAJAK LISTRIK ${settings.dusun}${periode}`.trim();
+        };
+
+        const getExportNote = () => {
+            if (!settings.dueDate) return "";
+            const date = new Date(settings.dueDate);
+            if (Number.isNaN(date.getTime())) {
+                return `PEMBAYARAN PALING LAMBAT TANGGAL ${settings.dueDate.toUpperCase()}`;
+            }
+            const formatted = date.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }).toUpperCase();
+            return `PEMBAYARAN PALING LAMBAT TANGGAL ${formatted}`;
+        };
+
+        const updateSetting = (key, value, formatter = v => v) => {
+            settings = { ...settings, [key]: formatter(value) };
+            persistSettings();
+            syncSettingsUi();
+            renderTable();
+        };
+
+        const getEntries = () => {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]").sort((a, b) => a.timestamp - b.timestamp);
+            } catch (err) {
+                console.error("Gagal membaca data:", err);
+                return [];
+            }
+        };
+        const setEntries = list => {
+            const ordered = [...list].sort((a, b) => a.timestamp - b.timestamp);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(ordered));
+        };
+
+        const getNominalRaw = () => parseNumericInput(els.nominal.value);
+
+        const getAdminFee = () => {
+            const value = Number(settings.admin);
+            return Number.isFinite(value) && value >= 0 ? value : DEFAULT_ADMIN_FEE;
+        };
+
+        const calculate = () => {
+            const raw = getNominalRaw();
+            const rounded = raw === 0 ? 0 : Math.ceil(raw / 1000) * 1000;
+            const adminFee = getAdminFee();
+            const admin = raw === 0 ? 0 : adminFee;
+            return { raw, rounded, admin, total: rounded + admin };
+        };
+
+        const handleNominalInput = () => {
+            const raw = getNominalRaw();
+            els.nominal.value = raw ? raw.toLocaleString("id-ID") : "";
+            updatePreview();
+        };
+
+        const updatePreview = () => {
+            const { raw, rounded, admin, total } = calculate();
+            els.outNama.textContent = els.nama.value || "-";
+            els.outAsli.textContent = rupiah(raw);
+            els.outBulat.textContent = rupiah(rounded);
+            els.outAdmin.textContent = rupiah(admin);
+            els.outTotal.textContent = rupiah(total);
+            els.save.disabled = !(els.nama.value.trim() && raw > 0);
+        };
+
+        const splitEntriesToColumns = entries => {
+            const half = Math.ceil(entries.length / 2);
+            const left = entries.slice(0, half).map((item, idx) => ({ ...item, seq: idx + 1 }));
+            const right = entries.slice(half).map((item, idx) => ({ ...item, seq: idx + 1 + half }));
+            const maxRows = Math.max(left.length, right.length);
+            const rows = Array.from({ length: maxRows }, (_, idx) => ({
+                left: left[idx] || null,
+                right: right[idx] || null
+            }));
+            const sum = arr => arr.reduce((acc, item) => acc + (item ? item.total : 0), 0);
+            return { rows, leftTotal: sum(left), rightTotal: sum(right) };
+        };
+
+        const buildExportMatrix = entries => {
+            const { rows, leftTotal, rightTotal } = splitEntriesToColumns(entries);
+            const matrix = [];
+            matrix.push([getExportTitle(), "", "", "", "", ""]);
+            matrix.push(["", "", "", "", "", ""]);
+            matrix.push(["NO", "NAMA", "JUMLAH", "NO", "NAMA", "JUMLAH"]);
+            rows.forEach(row => {
+                matrix.push([
+                    row.left ? row.left.seq : "",
+                    row.left ? row.left.nama : "",
+                    row.left ? formatJumlahPlain(row.left.total) : "",
+                    row.right ? row.right.seq : "",
+                    row.right ? row.right.nama : "",
+                    row.right ? formatJumlahPlain(row.right.total) : ""
+                ]);
+            });
+            matrix.push(["", "", "", "", "", ""]);
+            matrix.push(["Jumlah 1", "", formatJumlahPlain(leftTotal), "Jumlah 2", "", formatJumlahPlain(rightTotal)]);
+            matrix.push(["TOTAL 1 + 2", "", "", "", "", formatJumlahPlain(leftTotal + rightTotal)]);
+            const note = getExportNote();
+            let noteRowIndex = null;
+            if (note) {
+                matrix.push([note, "", "", "", "", ""]);
+                noteRowIndex = matrix.length - 1;
+            }
+            return { matrix, noteRowIndex };
+        };
+
+        const toggleRekapButtons = hasData => {
+            ["downloadImage", "downloadExcel", "clear"].forEach(key => {
+                els[key].disabled = !hasData;
+            });
+        };
+
+        const renderTable = () => {
+            const entries = getEntries();
+            const hasData = entries.length > 0;
+            toggleRekapButtons(hasData);
+            if (!hasData) {
+                els.tableWrapper.innerHTML = '<p class="empty">Belum ada data tersimpan.</p>';
+                return;
+            }
+            const { rows, leftTotal, rightTotal } = splitEntriesToColumns(entries);
+            const note = getExportNote();
+            const dataRows = rows.map(row => `
+        <tr>
+          <td>${row.left ? row.left.seq : ""}</td>
+          <td>${row.left ? row.left.nama : ""}</td>
+          <td class="amount">${row.left ? formatJumlahPlain(row.left.total) : ""}</td>
+          <td class="actions">${row.left ? `<button class="action-btn" type="button" data-edit-id="${row.left.id}">Edit</button>` : ""}</td>
+          <td>${row.right ? row.right.seq : ""}</td>
+          <td>${row.right ? row.right.nama : ""}</td>
+          <td class="amount">${row.right ? formatJumlahPlain(row.right.total) : ""}</td>
+          <td class="actions">${row.right ? `<button class="action-btn" type="button" data-edit-id="${row.right.id}">Edit</button>` : ""}</td>
+        </tr>`).join("");
+            const totalAll = leftTotal + rightTotal;
+            els.tableWrapper.innerHTML = `
+        <div class="table-shell">
+          <div class="rekap-title">${getExportTitle()}</div>
+          <table class="rekap-table">
+            <thead>
+              <tr>
+                <th>NO</th><th>NAMA</th><th>JUMLAH</th><th class="actions">AKSI</th>
+                <th>NO</th><th>NAMA</th><th>JUMLAH</th><th class="actions">AKSI</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${dataRows}
+              <tr class="summary-row">
+                <td colspan="2">Jumlah 1</td>
+                <td class="amount">${formatJumlahPlain(leftTotal)}</td>
+                <td class="actions"></td>
+                <td colspan="2">Jumlah 2</td>
+                <td class="amount">${formatJumlahPlain(rightTotal)}</td>
+                <td class="actions"></td>
+              </tr>
+              <tr class="grand-row">
+                <td colspan="6">TOTAL 1 + 2</td>
+                <td class="amount">${formatJumlahPlain(totalAll)}</td>
+                <td class="actions"></td>
+              </tr>
+              ${note ? `<tr class="note-row"><td colspan="8">${note}</td></tr>` : ""}
+            </tbody>
+          </table>
+        </div>`;
+        };
+
+        const resetEditState = () => {
+            editingId = null;
+            els.save.textContent = "Simpan ke Rekap";
+            els.cancelEdit.hidden = true;
+            els.editIndicator.hidden = true;
+        };
+
+        const cancelEditing = () => {
+            resetEditState();
+            els.nama.value = "";
+            els.nominal.value = "";
+            updatePreview();
+        };
+
+        const startEdit = entry => {
+            editingId = entry.id;
+            els.nama.value = entry.nama;
+            els.nominal.value = entry.nominal ? entry.nominal.toLocaleString("id-ID") : "";
+            els.save.textContent = "Perbarui Data";
+            els.cancelEdit.hidden = false;
+            els.editIndicator.hidden = false;
+            els.editIndicator.textContent = `Sedang mengedit data ${entry.nama}`;
+            updatePreview();
+            els.nama.focus();
+        };
+
+        const saveEntry = () => {
+            const { raw, rounded, admin, total } = calculate();
+            const name = els.nama.value.trim().toUpperCase();
+            if (!(name && raw > 0)) return;
+            const entries = getEntries();
+            if (editingId) {
+                const updated = entries.map(item => item.id === editingId ? {
+                    ...item,
+                    nama: name,
+                    nominal: raw,
+                    dibulatkan: rounded,
+                    admin,
+                    total
+                } : item);
+                setEntries(updated);
+            } else {
+                entries.push({
+                    id: makeId(),
+                    nama: name,
+                    nominal: raw,
+                    dibulatkan: rounded,
+                    admin,
+                    total,
+                    timestamp: Date.now()
+                });
+                setEntries(entries);
+            }
+            renderTable();
+            cancelEditing();
+        };
+
+        const downloadImage = async () => {
+            if (typeof html2canvas === "undefined") {
+                alert("Library html2canvas belum termuat. Pastikan koneksi internet aktif.");
+                return;
+            }
+            const shell = els.tableWrapper.querySelector(".table-shell");
+            if (!shell) {
+                alert("Belum ada data untuk diunduh.");
+                return;
+            }
+            const clone = shell.cloneNode(true);
+            clone.style.position = "fixed";
+            clone.style.top = "-99999px";
+            clone.style.left = "-99999px";
+            clone.style.width = `${shell.offsetWidth}px`;
+            clone.querySelectorAll(".actions").forEach(node => node.remove());
+            clone.querySelectorAll("th.actions").forEach(node => node.remove());
+            const totalLabelCell = clone.querySelector(".grand-row td[colspan]");
+            if (totalLabelCell) {
+                totalLabelCell.colSpan = Math.max(1, totalLabelCell.colSpan - 1);
+            }
+            document.body.appendChild(clone);
+            let canvas = null;
+            try {
+                canvas = await html2canvas(clone, {
+                    backgroundColor: "#eef2fb",
+                    scale: 2
+                });
+            } catch (err) {
+                console.error("Gagal membuat gambar:", err);
+                alert("Terjadi kesalahan saat membuat gambar.");
+            } finally {
+                document.body.removeChild(clone);
+            }
+            if (!canvas) return;
+            canvas.toBlob(blob => {
+                if (!blob) return;
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = `${getImageFileName()}.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            });
+        };
+
+        const downloadExcel = () => {
+            if (typeof XLSX === "undefined") {
+                alert("Library XLSX belum termuat. Pastikan koneksi internet aktif.");
+                return;
+            }
+            const entries = getEntries();
+            if (!entries.length) {
+                alert("Belum ada data untuk diunduh.");
+                return;
+            }
+            const { matrix, noteRowIndex } = buildExportMatrix(entries);
+            const worksheet = XLSX.utils.aoa_to_sheet(matrix);
+            worksheet['!cols'] = [
+                { wch: 6 }, { wch: 24 }, { wch: 12 },
+                { wch: 6 }, { wch: 24 }, { wch: 12 }
+            ];
+            worksheet['!merges'] = [
+                { s: { r: 0, c: 0 }, e: { r: 0, c: 5 } },
+                ...(typeof noteRowIndex === "number" ? [{ s: { r: noteRowIndex, c: 0 }, e: { r: noteRowIndex, c: 5 } }] : [])
+            ];
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap");
+            XLSX.writeFile(workbook, `rekap-pajak-${new Date().toISOString().slice(0, 10)}.xlsx`);
+        };
+
+        const clearEntries = () => {
+            if (!getEntries().length) return;
+            if (confirm("Hapus semua data rekap?")) {
+                localStorage.removeItem(STORAGE_KEY);
+                renderTable();
+                cancelEditing();
+            }
+        };
+
+        const loadSampleData = preset => {
+            const dataset = SAMPLE_DATASETS[preset];
+            if (!dataset) return;
+            const existing = getEntries();
+            if (existing.length && !confirm(`Timpa data saat ini dengan data sampel ${preset}?`)) return;
+            const now = Date.now();
+            const entries = dataset.map((name, idx) => ({
+                id: makeId(),
+                nama: name,
+                nominal: 0,
+                dibulatkan: 0,
+                admin: 0,
+                total: 0,
+                timestamp: now + idx
+            }));
+            setEntries(entries);
+            settings = { ...settings, dusun: preset };
+            persistSettings();
+            syncSettingsUi();
+            renderTable();
+            cancelEditing();
+        };
+
+        els.nama.addEventListener("input", updatePreview);
+        els.nominal.addEventListener("input", handleNominalInput);
+        els.save.addEventListener("click", saveEntry);
+        els.cancelEdit.addEventListener("click", cancelEditing);
+        els.sampleGandu.addEventListener("click", () => loadSampleData("GANDU"));
+        els.sampleJrakah.addEventListener("click", () => loadSampleData("JRAKAH"));
+        els.dusun.addEventListener("change", e => updateSetting("dusun", e.target.value.toUpperCase()));
+        els.periode.addEventListener("input", e => {
+            const value = e.target.value.toUpperCase().trim();
+            updateSetting("periode", value);
+        });
+        els.dueDate.addEventListener("change", e => updateSetting("dueDate", e.target.value));
+        els.adminFee.addEventListener("input", e => {
+            const value = parseNumericInput(e.target.value);
+            updateSetting("admin", value);
+        });
+        els.tableWrapper.addEventListener("click", event => {
+            const trigger = event.target.closest("[data-edit-id]");
+            if (!trigger) return;
+            const entry = getEntries().find(item => item.id === trigger.dataset.editId);
+            if (entry) startEdit(entry);
+        });
+        els.downloadImage.addEventListener("click", downloadImage);
+        els.downloadExcel.addEventListener("click", downloadExcel);
+        els.clear.addEventListener("click", clearEntries);
+
+        syncSettingsUi();
+        resetEditState();
+        updatePreview();
+        renderTable();
+    </script>
+</body>
+
+</html>
